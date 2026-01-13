@@ -156,10 +156,9 @@ class CountdownTimer:
             text="Ready",
             font=('Segoe UI', 10),
             fg=self.COLORS['text_dim'],
-            bg=self.COLORS['bg_secondary'],
-            pady=(0, 10)
+            bg=self.COLORS['bg_secondary']
         )
-        self.status_label.pack()
+        self.status_label.pack(pady=(0, 10))
 
         # Time input section
         input_frame = tk.Frame(main_frame, bg=self.COLORS['bg'])
