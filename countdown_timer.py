@@ -10,6 +10,7 @@ import time
 import threading
 import winsound
 import sys
+import ctypes
 
 
 class CountdownTimer:
@@ -51,6 +52,9 @@ class CountdownTimer:
         except:
             pass
 
+        # Apply dark title bar on Windows
+        self._set_dark_title_bar()
+
         self._setup_styles()
         self._create_widgets()
         self._bind_events()
@@ -60,6 +64,35 @@ class CountdownTimer:
         x = (self.root.winfo_screenwidth() - self.root.winfo_width()) // 2
         y = (self.root.winfo_screenheight() - self.root.winfo_height()) // 2
         self.root.geometry(f"+{x}+{y}")
+
+    def _set_dark_title_bar(self):
+        """Apply dark mode to Windows title bar."""
+        try:
+            # Get the window handle
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+
+            # DWMWA_USE_IMMERSIVE_DARK_MODE = 20 (Windows 10 20H1+ and Windows 11)
+            DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+
+            # Try the modern attribute first (Windows 10 20H1+)
+            result = ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_USE_IMMERSIVE_DARK_MODE,
+                ctypes.byref(ctypes.c_int(1)),
+                ctypes.sizeof(ctypes.c_int)
+            )
+
+            # If that didn't work, try the older attribute (Windows 10 pre-20H1)
+            if result != 0:
+                DWMWA_USE_IMMERSIVE_DARK_MODE_OLD = 19
+                ctypes.windll.dwmapi.DwmSetWindowAttribute(
+                    hwnd,
+                    DWMWA_USE_IMMERSIVE_DARK_MODE_OLD,
+                    ctypes.byref(ctypes.c_int(1)),
+                    ctypes.sizeof(ctypes.c_int)
+                )
+        except:
+            pass  # Silently fail on non-Windows or older Windows versions
 
     def _setup_styles(self):
         """Configure ttk styles for modern look."""
